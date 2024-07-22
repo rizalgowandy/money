@@ -1,6 +1,6 @@
 # Money
 
-[![Build Status](https://travis-ci.org/elixirmoney/money.svg?branch=master)](https://travis-ci.org/elixirmoney/money)
+[![CI Status](https://github.com/elixirmoney/money/actions/workflows/ci.yml/badge.svg)](https://github.com/elixirmoney/money/actions/workflows/ci.yml)
 [![Module Version](https://img.shields.io/hexpm/v/money.svg)](https://hex.pm/packages/money)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/money/)
 [![Total Download](https://img.shields.io/hexpm/dt/money.svg)](https://hex.pm/packages/money)
@@ -22,7 +22,7 @@ Add the following to your `mix.exs`:
 
 ```elixir
 def deps do
-  [{:money, "~> 1.11"}]
+  [{:money, "~> 1.12"}]
 end
 ```
 
@@ -325,6 +325,18 @@ config :money,
   ]
 ```
 
+### Custom Currencies Display Options
+
+In some cases, we may need to display the currency in a different way than the default format. For example, we may want to display the currency symbol on the right side of the amount for some currencies. To achieve this, you can add the following configuration:
+
+```elixir
+config :money,
+  custom_display_options: [
+    EUR: %{symbol_on_right: true, symbol_space: true, separator: ".", delimiter: ",", symbol: true},
+    JPY: %{symbol_on_right: true, separator: ".", delimiter: ",", symbol: true}
+  ]
+```
+
 ## Troubleshooting
 
 ### Validating amount in Ecto changeset
@@ -361,6 +373,10 @@ defp validate_money(changeset, field) do
   end)
 end
 ```
+
+### Lack of precision when using `Money.parse`
+
+Sometimes you need to work with large numbers (for example, cryptocurrencies) and `Float` precision is not enough. In this case it is better to use [Decimal](https://hex.pm/packages/decimal) package. Money already has support for Decimal and you just need to add it to your project dependencies.
 
 ## License
 

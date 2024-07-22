@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.13.1 – 2024-07-10
+
+- fix release not including blend (which is a dev tool) (#229)
+
+## 1.13.0 – 2024-07-09
+
+- Add custom_display_options configuration (#225)
+- Update Money.parse/1 to work with decimal ~> 1.2 and ~> 2.0 (#227)
+
+## 1.12.4 – 2024-01-04
+
+- Allow phoenix_html 4.0 (#212)
+
+## 1.12.3 – 2023-08-23
+
+- Fix map_type dump typespec (#204)
+- Add SLE which is the new currency in Sierra Leone (#203)
+- Bugfix: {Currency.Type.dump/1} missing ISO string support (#201)
+
+## 1.12.2 – 2023-01-19
+
+- Better error messages for `Money.add` and `Monet.subtract` (#191)
+
+## 1.12.1 – 2022-11-23
+
+This release rolls back the breaking change in Money.parse .  
+Support exponential notation feature will be added in the next major release.
+
+### 🐛Bug Fixes
+
+- Remove support exponential notation for Money.parse (#192) (#198)
+
+## 1.12.0 – 2022-11-18
+
+### 🚀Enhancements
+
+- Fix PEN currency symbol (#191)
+- Migrate from travis ci to github actions (#193)
+- Support exponential notation for Money.parse (#192)
+- Add readme section about using Decimal (#194)
+- Bump dependencies (#186)(#187)(#196)
+
 ## 1.11.0 – 2022-08-15
 
 ### 🚀Enhancements

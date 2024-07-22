@@ -1,7 +1,11 @@
+if File.exists?("blend/premix.exs") do
+  Code.compile_file("blend/premix.exs")
+end
+
 defmodule Money.Mixfile do
   use Mix.Project
 
-  @version "1.11.0"
+  @version "1.13.1"
   @github_url "https://github.com/elixirmoney/money"
 
   def project do
@@ -10,7 +14,7 @@ defmodule Money.Mixfile do
       aliases: aliases(),
       name: "Money",
       version: @version,
-      elixir: "~> 1.0",
+      elixir: "~> 1.11",
       deps: deps(),
       docs: fn ->
         [
@@ -27,6 +31,7 @@ defmodule Money.Mixfile do
       preferred_cli_env: [check: :test],
       dialyzer: [plt_add_apps: [:ecto, :phoenix_html, :decimal]]
     ]
+    |> Keyword.merge(maybe_lockfile_option())
   end
 
   def application do
@@ -36,17 +41,29 @@ defmodule Money.Mixfile do
   defp deps do
     [
       # Soft dependencies
-      {:ecto, "~> 1.0 or ~> 2.0 or ~> 2.1 or ~> 3.0", optional: true},
-      {:phoenix_html, "~> 2.0 or ~> 3.0", optional: true},
-      {:decimal, "~> 1.0 or ~> 2.0", optional: true},
+      {:ecto, "~> 2.1 or ~> 3.0", optional: true},
+      {:phoenix_html, "~> 2.0 or ~> 3.0 or ~> 4.0", optional: true},
+      {:decimal, "~> 1.2 or ~> 2.0", optional: true},
 
       # Code style and analyzers
-      {:credo, "~> 1.4.1", only: [:dev, :test], runtime: false, optional: true},
-      {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false, optional: true},
+      # Credo 1.7.7 requires Elixir 1.13+
+      {:credo, "== 1.7.6", only: [:dev, :test], runtime: false, optional: true},
+      {:dialyxir, "~> 1.4.2", only: [:dev, :test], runtime: false, optional: true},
 
       # Docs
-      {:ex_doc, "~> 0.21", only: [:dev, :docs]}
+      {:ex_doc, "~> 0.21", only: [:dev, :docs]},
+
+      # Needed to test diffent Decimal versions
+      {:blend, "~> 0.3.0", only: :dev}
     ]
+  end
+
+  defp maybe_lockfile_option do
+    case System.get_env("MIX_LOCKFILE") do
+      nil -> []
+      "" -> []
+      lockfile -> [lockfile: lockfile]
+    end
   end
 
   defp description do

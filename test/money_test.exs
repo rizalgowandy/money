@@ -3,7 +3,7 @@ defmodule MoneyTest do
   doctest Money
 
   require Money.Currency
-  import Money.Currency, only: [usd: 1, eur: 1, clf: 1, jpy: 1, omr: 1, xau: 1, zar: 1]
+  import Money.Currency, only: [usd: 1, eur: 1, clf: 1, jpy: 1, omr: 1, xau: 1, zar: 1, ars: 1, pen: 1, brl: 1]
 
   test "new/1 with default currency set" do
     try do
@@ -26,6 +26,7 @@ defmodule MoneyTest do
     end
   end
 
+  @tag decimal_1_2: true
   test "parse/3" do
     assert Money.parse("$1,000.00", :USD) == {:ok, usd(100_000)}
     assert Money.parse("$ 1,000.00", :USD) == {:ok, usd(100_000)}
@@ -52,6 +53,7 @@ defmodule MoneyTest do
     assert Money.parse("1000.0", :WRONG) == :error
   end
 
+  @tag decimal_1_2: true
   test "parse/1 big money" do
     assert Money.parse("$1,000,000,000,000,000.01", :USD) ==
              {:ok, usd(1_000_000_000_000_000_01)}
@@ -63,6 +65,7 @@ defmodule MoneyTest do
              {:ok, usd(1_000_000_000_000_000_000_000_01)}
   end
 
+  @tag decimal_1_2: true
   test "parse/3 with options" do
     assert Money.parse("€1.000,00", :EUR, separator: ".", delimiter: ",") == {:ok, eur(100_000)}
     assert Money.parse("€ 1.000,00", :EUR, separator: ".", delimiter: ",") == {:ok, eur(100_000)}
@@ -71,6 +74,7 @@ defmodule MoneyTest do
     assert Money.parse("1000,0", :EUR, separator: ".", delimiter: ",") == {:ok, eur(100_000)}
   end
 
+  @tag decimal_1_2: true
   test "parse/2 with default currency set" do
     try do
       Application.put_env(:money, :default_currency, :GBP)
@@ -80,6 +84,7 @@ defmodule MoneyTest do
     end
   end
 
+  @tag decimal_1_2: true
   test "parse/2 with different exponents" do
     assert Money.parse(1_000.00, :EUR) == {:ok, eur(100_000)}
     assert Money.parse(1_000.00, :JPY) == {:ok, jpy(1000)}
@@ -336,6 +341,55 @@ defmodule MoneyTest do
       Application.delete_env(:money, :separator)
       Application.delete_env(:money, :delimiter)
       Application.delete_env(:money, :symbol)
+    end
+  end
+
+  test "to_string configuration with custom_display_options" do
+    try do
+      # Default configuration
+      Application.put_env(:money, :separator, ",")
+      Application.put_env(:money, :delimeter, ".")
+      Application.put_env(:money, :symbol, false)
+      Application.put_env(:money, :symbol_on_right, false)
+      Application.put_env(:money, :symbol_space, false)
+      Application.put_env(:money, :fractional_unit, true)
+      Application.put_env(:money, :strip_insignificant_zeros, false)
+
+      # Custom configuration
+      Application.put_env(:money, :custom_display_options,
+        EUR: %{symbol: true, symbol_on_right: true, symbol_space: true, separator: ".", delimiter: ","},
+        JPY: %{symbol: true, symbol_on_right: true, separator: ","},
+        ARS: %{symbol: true, symbol_on_right: false, separator: ".", delimiter: ","},
+        PEN: %{symbol: true, symbol_on_right: false, symbol_space: true, separator: ",", delimiter: "."},
+        BRL: %{symbol: false, separator: ".", delimiter: ","}
+      )
+
+      # default configuration test
+      assert Money.to_string(usd(1_234_567_890)) == "12,345,678.90"
+
+      # custom configuration test
+      assert Money.to_string(eur(1_234_567_890)) == "12.345.678,90 €"
+      assert Money.to_string(jpy(1_234_567_890)) == "1,234,567,890¥"
+      assert Money.to_string(ars(1_234_567_890)) == "$12.345.678,90"
+      assert Money.to_string(pen(1_234_567_890)) == "S/ 12,345,678.90"
+      assert Money.to_string(brl(1_234_567_8900)) == "123.456.789,00"
+
+      # overwriting with options
+      assert Money.to_string(eur(1_234_567_890), symbol: false) == "12.345.678,90"
+      assert Money.to_string(jpy(1_234_567_890), symbol_space: true) == "1,234,567,890 ¥"
+      assert Money.to_string(ars(1_234_567_890), symbol_on_right: true) == "12.345.678,90$"
+      assert Money.to_string(pen(1_234_567_890), fractional_unit: false, symbol_space: false) == "S/12,345,678"
+      assert Money.to_string(brl(1_234_567_8900), symbol: true, strip_insignificant_zeros: true) == "R$123.456.789"
+    after
+      Application.delete_env(:money, :separator)
+      Application.delete_env(:money, :delimeter)
+      Application.delete_env(:money, :symbol)
+      Application.delete_env(:money, :symbol_on_right)
+      Application.delete_env(:money, :symbol_space)
+      Application.delete_env(:money, :fractional_unit)
+      Application.delete_env(:money, :strip_insignificant_zeros)
+
+      Application.delete_env(:money, :custom_display_options)
     end
   end
 

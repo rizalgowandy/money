@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        include:
+          - otp: 27.0
+            elixir: 1.17.2
+          - otp: 21.3
+            elixir: 1.11.4
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - run: BLEND=decimal_1_2 mix deps.get
+      # Run tests for decimal ~> 1.2 only
+      - run: BLEND=decimal_1_2 mix test ./test/money_test.exs --only decimal_1_2
+      - run: BLEND=decimal_2_0 mix deps.get
+      - run: BLEND=decimal_2_0 mix test
